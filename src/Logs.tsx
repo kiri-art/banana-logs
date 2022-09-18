@@ -2,7 +2,7 @@ import React from "react";
 import { format } from "date-fns";
 import Ansi from "ansi-to-react";
 
-import type { Model } from "./App";
+import type { Model } from "./ModelView";
 import getLog from "./getLog";
 
 interface LogsResult {
@@ -27,8 +27,13 @@ function fixLog(log: string) {
   );
 }
 
-// export default function Logs({ modelID }: { modelID: string }) {
-export default function Logs({ model }: { model: Model }) {
+export default function Logs({
+  modelID,
+  setOptimized,
+}: {
+  modelID: string;
+  setOptimized: (optimized: boolean | null) => void;
+}) {
   const [_logs, _setLogs] = React.useState<LogsResult | null>(null);
   const [disabled, setDisabled] = React.useState(false);
   const [loadingLog, setLoadingLog] = React.useState(false);
@@ -39,7 +44,7 @@ export default function Logs({ model }: { model: Model }) {
     setDisabled(true);
     const response = await fetch(
       "https://backend-f3tq-qvcm.zeet-audiblogs.zeet.app/model/" +
-        model.modelID +
+        modelID +
         "/logs"
     );
     const result: LogsResult = await response.json();
@@ -50,19 +55,19 @@ export default function Logs({ model }: { model: Model }) {
   async function loadLog(modelID: string, logID: string) {
     setLogID(logID);
     setLoadingLog(true);
-    const log = await getLog(model.modelID, logID);
+    const log = await getLog(modelID, logID);
     setLoadingLog(false);
     setLoadedLog(log);
   }
 
   async function logSelect(event: React.ChangeEvent<HTMLSelectElement>) {
     const logID = event.target.value;
-    await loadLog(model.modelID, logID);
+    await loadLog(modelID, logID);
   }
 
   async function reload() {
     setLoadedLog("");
-    await loadLog(model.modelID, logID);
+    await loadLog(modelID, logID);
   }
 
   const logs = React.useMemo(() => {
@@ -91,19 +96,19 @@ export default function Logs({ model }: { model: Model }) {
     (async function checkRecentBuild() {
       if (!mostRecentBuildLog) return;
       console.log({ mostRecentBuildLog });
-      const log = await getLog(model.modelID, mostRecentBuildLog.name);
+      const log = await getLog(modelID, mostRecentBuildLog.name);
       console.log(log);
 
-      if (log.match(/Optimization Failed/)) model._setOptimized(false);
-      else if (log.match(/optimizations SUCCESS/)) model._setOptimized(true);
+      if (log.match(/Optimization Failed/)) setOptimized(false);
+      else if (log.match(/optimizations SUCCESS/)) setOptimized(true);
       // Note, we've already checked for "Optimization Failed" - guess this means
       // it succeeded `:)
       else if (
         log.match(/Running optimizations/) &&
         log.match(/Model Registered/)
       )
-        model._setOptimized(true);
-      else model._setOptimized(null);
+        setOptimized(true);
+      else setOptimized(null);
     })();
 
     console.log(logs);

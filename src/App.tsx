@@ -9,34 +9,11 @@ export interface ModelStub {
   modelKey: string;
 }
 
-export interface Model {
-  modelID: string;
-  modelKey: string;
-  callsFinished: number;
-  docs: string;
-  healthyPods: 0;
-  minReplicas: 0;
-  queuedTasks: number;
-  requestedPods: number;
-  suggestedPods: number;
-  sourceGitRepo: string;
-  status: string;
-  timeout: number;
-  workingTasks: number;
-  // us (banana-logs)
-  _checking: boolean;
-  _optimized: boolean | null;
-  _setOptimized: (optimized: boolean | null) => void;
-}
-
 function App() {
   const [modelString, setModelString] = React.useState(lsBananaUserModels);
   const [modelStringError, setModelStringError] = React.useState("");
-  const modelDataRef = React.useRef<Record<string, Model>>({});
-  const [modelData, setModelData] = React.useState<Record<string, Model>>({});
-  const [checkDisabled, setCheckDisabled] = React.useState("");
 
-  const models = React.useMemo<Model[] | ModelStub[]>(() => {
+  const models = React.useMemo<ModelStub[]>(() => {
     if (
       (modelString.startsWith("'") && modelString.endsWith("'")) ||
       (modelString.startsWith('"') && modelString.endsWith('"'))
@@ -58,53 +35,6 @@ function App() {
     if (modelStringError) setModelStringError("");
     return models;
   }, [modelString]);
-
-  async function check() {
-    await Promise.all(
-      models.map(async (model, i) => {
-        setCheckDisabled(`${i} / ${models.length}`);
-
-        const setOptimized = (optimized: boolean | null) => {
-          modelDataRef.current = {
-            ...modelDataRef.current,
-            [model.modelID]: {
-              ...model,
-              ...(modelDataRef.current[model.modelID] as Model),
-              _optimized: optimized,
-            },
-          };
-          setModelData(modelDataRef.current);
-        };
-
-        modelDataRef.current = {
-          ...modelDataRef.current,
-          [model.modelID]: {
-            ...model,
-            ...(modelDataRef.current[model.modelID] as Model),
-            _checking: true,
-            _setOptimized: setOptimized,
-          },
-        };
-        setModelData(modelDataRef.current);
-        const response = await fetch(
-          "https://backend-f3tq-qvcm.zeet-audiblogs.zeet.app/model/" +
-            model.modelID
-        );
-        const result = await response.json();
-        modelDataRef.current = {
-          ...modelDataRef.current,
-          [model.modelID]: {
-            ...result,
-            _setOptimized: setOptimized,
-          },
-        };
-        setModelData(modelDataRef.current);
-      })
-    );
-    setCheckDisabled("");
-  }
-
-  console.log(modelData);
 
   return (
     <div className="App">
@@ -136,14 +66,11 @@ function App() {
           <a href="https://github.com/gadicc/banana-logs">GitHub</a>.
         </div>
         <br />
-        <button onClick={check} disabled={!!checkDisabled}>
-          {checkDisabled || "Check"}
-        </button>
-        <br />
         {models.map((model) => (
           <ModelView
             key={model.modelID}
-            model={modelData[model.modelID] || model}
+            modelID={model.modelID}
+            modelKey={model.modelKey}
           />
         ))}
       </div>
