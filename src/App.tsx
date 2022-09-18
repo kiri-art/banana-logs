@@ -132,7 +132,7 @@ function App() {
           Note: This is a SPA with no backend. Above data is saved to
           localStorage only. You're encouraged to open the developer console and
           see for yourself that no data is sent over the network except to
-          zeet.app, and review the code on{" "}
+          zeet.app (where Banana store their logs), and review the code on{" "}
           <a href="https://github.com/gadicc/banana-logs">GitHub</a>.
         </div>
         <br />
