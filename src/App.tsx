@@ -33,6 +33,9 @@ function App() {
     if (lsBananaUserModels !== modelString)
       localStorage.bananaUserModels = modelString;
     if (modelStringError) setModelStringError("");
+
+    if (!Array.isArray(models)) return [];
+
     return models;
   }, [modelString]);
 
