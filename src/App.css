@@ -49,6 +49,7 @@
   background: rgb(255, 54, 54);
 }
 
+.statusOptimizing,
 .statusBuilding {
   background: rgb(163, 138, 13);
 }
