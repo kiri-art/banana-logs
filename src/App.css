@@ -54,4 +54,5 @@
   border: 1px solid #aaa;
   padding: 10px;
   overflow: auto;
+  max-height: 300px;
 }

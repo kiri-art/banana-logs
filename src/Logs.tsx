@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import Ansi from "ansi-to-react";
 
 import type { Model } from "./App";
 import getLog from "./getLog";
@@ -11,6 +12,18 @@ interface LogsResult {
 interface Log {
   date: Date;
   name: string;
+}
+
+function fixLog(log: string) {
+  console.log({ log });
+  return (
+    log
+      .replace(/([\]\)])([A-Z])/g, "$1\n$2")
+      //.replace(/(\x1B\[36mINFO\x1B\[0m[0000]) /g, "\n$1/")
+      .replace(/(\x1B\[36mINFO\x1B\[0m\[\d{4,4}\])/g, "\n$1")
+      .replace(/  File/g, "\n  File")
+      .replace(/([^ ])( {4,4})([^ ])/g, "$1\n$2$3")
+  );
 }
 
 // export default function Logs({ modelID }: { modelID: string }) {
@@ -110,7 +123,9 @@ export default function Logs({ model }: { model: Model }) {
 
       {loadedLog && (
         <div className="log">
-          <pre>{loadedLog}</pre>
+          <pre>
+            <Ansi>{fixLog(loadedLog)}</Ansi>
+          </pre>
         </div>
       )}
     </div>
