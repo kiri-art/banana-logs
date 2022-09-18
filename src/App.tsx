@@ -1,24 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+      <div>
+        <h1>Banana Logs</h1>
+
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Log in to <a href="https://app.banana.dev/">app.banana.dev</a>, open
+          developer console, and copy and paste the result of:
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+        <p>
+          <pre style={{ paddingLeft: "15px" }}>
+            JSON.stringify(JSON.parse(localStorage.bananaState).bananaUserModels);
+          </pre>
+        </p>
+
+        <textarea
+          value={models}
+          onChange={(event) => setValue(event.target.value)}
+        />
+      </div>
     </div>
   );
 }
