@@ -117,7 +117,7 @@ export default function Logs({ model }: { model: Model }) {
           <select onChange={logSelect}>
             <option value="">Choose Runtime Log</option>
             {logs
-              .filter((log) => log.type === "build")
+              .filter((log) => log.type === "runtime")
               .map((log) => (
                 <option key={log.name} value={log.name}>
                   {format(log.date, "yyyy-MM-dd kk:mm:ss")}
