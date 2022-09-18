@@ -49,6 +49,10 @@
   background: rgb(255, 54, 54);
 }
 
+.statusBuilding {
+  background: rgb(163, 138, 13);
+}
+
 .log {
   margin-top: 10px;
   border: 1px solid #aaa;
