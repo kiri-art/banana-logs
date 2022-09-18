@@ -15,7 +15,8 @@ interface Log {
 }
 
 function fixLog(log: string) {
-  console.log({ log });
+  // @ts-expect-error: blah
+  window.log = log;
   return (
     log
       .replace(/([\]\)])([A-Z])/g, "$1\n$2")
