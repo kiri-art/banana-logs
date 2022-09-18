@@ -95,9 +95,9 @@ export default function Logs({
     const mostRecentBuildLog = logs.filter((log) => log.type === "build")[0];
     (async function checkRecentBuild() {
       if (!mostRecentBuildLog) return;
-      console.log({ mostRecentBuildLog });
+      // console.log({ mostRecentBuildLog });
       const log = await getLog(modelID, mostRecentBuildLog.name);
-      console.log(log);
+      // console.log(log);
 
       if (log.match(/Optimization Failed/)) setOptimized(false);
       else if (log.match(/optimizations SUCCESS/)) setOptimized(true);
@@ -111,7 +111,7 @@ export default function Logs({
       else setOptimized(null);
     })();
 
-    console.log(logs);
+    // console.log(logs);
     return logs;
   }, [_logs]);
 
