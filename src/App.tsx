@@ -62,7 +62,7 @@ function App() {
         )}
         <br />
         <div>
-          Note: This is a SPA with no backend. Above data is saved to
+          Note: This is an SPA with no backend. Above data is saved to
           localStorage only. You're encouraged to open the developer console and
           see for yourself that no data is sent over the network except to
           zeet.app (where Banana store their logs), and review the code on{" "}
