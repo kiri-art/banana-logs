@@ -31,7 +31,9 @@ function fixLog(log: string) {
 export default function Logs({ model }: { model: Model }) {
   const [_logs, _setLogs] = React.useState<LogsResult | null>(null);
   const [disabled, setDisabled] = React.useState(false);
+  const [loadingLog, setLoadingLog] = React.useState(false);
   const [loadedLog, setLoadedLog] = React.useState("");
+  const [logID, setLogID] = React.useState("");
 
   async function load() {
     setDisabled(true);
@@ -45,10 +47,22 @@ export default function Logs({ model }: { model: Model }) {
     setDisabled(false);
   }
 
+  async function loadLog(modelID: string, logID: string) {
+    setLogID(logID);
+    setLoadingLog(true);
+    const log = await getLog(model.modelID, logID);
+    setLoadingLog(false);
+    setLoadedLog(log);
+  }
+
   async function logSelect(event: React.ChangeEvent<HTMLSelectElement>) {
     const logID = event.target.value;
-    const log = await getLog(model.modelID, logID);
-    setLoadedLog(log);
+    await loadLog(model.modelID, logID);
+  }
+
+  async function reload() {
+    setLoadedLog("");
+    await loadLog(model.modelID, logID);
   }
 
   const logs = React.useMemo(() => {
@@ -125,14 +139,15 @@ export default function Logs({ model }: { model: Model }) {
               ))}
           </select>
 
-          {loadedLog && <button>⟳</button>}
+          {loadedLog && <button onClick={reload}>⟳</button>}
         </span>
       )}
 
-      {loadedLog && (
+      {(loadingLog || loadedLog) && (
         <div className="log">
           <pre>
-            <Ansi>{fixLog(loadedLog)}</Ansi>
+            {loadedLog && <Ansi>{fixLog(loadedLog)}</Ansi>}
+            {loadingLog && "Loading..."}
           </pre>
         </div>
       )}
