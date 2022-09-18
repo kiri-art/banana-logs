@@ -82,6 +82,9 @@ export default function Logs({ model }: { model: Model }) {
 
       if (log.match(/Optimization Failed/)) model._setOptimized(false);
       else if (log.match(/optimizations SUCCESS/)) model._setOptimized(true);
+      // Note, we've already checked for "Optimization Failed" - guess this means
+      // it succeeded `:)
+      else if (log.match(/Running optimizations/)) model._setOptimized(true);
       else model._setOptimized(null);
     })();
 
