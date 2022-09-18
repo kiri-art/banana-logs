@@ -39,7 +39,7 @@ export default function Logs({ model }: { model: Model }) {
 
   const logs = React.useMemo(() => {
     if (!_logs) return [];
-    let logs = _logs.logIDs
+    const logs = _logs.logIDs
       .map((name: string) => {
         const match = name.match(/_([\d]+)\.log$/);
         const timestamp = match && match[1] && parseInt(match[1]);
