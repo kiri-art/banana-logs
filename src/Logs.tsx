@@ -39,6 +39,11 @@ export default function Logs({
   const [disabled, setDisabled] = React.useState(false);
   const [loadingLog, setLoadingLog] = React.useState(false);
   const [loadedLog, setLoadedLog] = React.useState("");
+  const [loadedLogType, setLoadedLogType] = React.useState("");
+  const selectedLog = {
+    build: React.useState(""),
+    runtime: React.useState(""),
+  };
   const [logID, setLogID] = React.useState("");
 
   async function load() {
@@ -56,14 +61,22 @@ export default function Logs({
   async function loadLog(modelID: string, logID: string) {
     setLogID(logID);
     setLoadingLog(true);
+    setLoadedLogType("");
     const log = await getLog(modelID, logID);
     setLoadingLog(false);
     setLoadedLog(log);
+    setLoadedLogType(logID.match(/build/) ? "build" : "runtime");
   }
 
-  async function logSelect(event: React.ChangeEvent<HTMLSelectElement>) {
-    const logID = event.target.value;
-    await loadLog(modelID, logID);
+  function logSelect(type: "build" | "runtime") {
+    return async function logSelect(
+      event: React.ChangeEvent<HTMLSelectElement>
+    ) {
+      const logID = event.target.value;
+      await loadLog(modelID, logID);
+      selectedLog[type][1](logID);
+      selectedLog[type === "build" ? "runtime" : "build"][1]("");
+    };
   }
 
   async function reload() {
@@ -127,7 +140,7 @@ export default function Logs({
       </button>
       {logs.length > 0 && (
         <span>
-          <select onChange={logSelect}>
+          <select value={selectedLog.build[0]} onChange={logSelect("build")}>
             <option value="">Choose Build Log</option>
             {logs
               .filter((log) => log.type === "build")
@@ -138,7 +151,10 @@ export default function Logs({
               ))}
           </select>
 
-          <select onChange={logSelect}>
+          <select
+            value={selectedLog.runtime[0]}
+            onChange={logSelect("runtime")}
+          >
             <option value="">Choose Runtime Log</option>
             {logs
               .filter((log) => log.type === "runtime")
@@ -156,7 +172,11 @@ export default function Logs({
       {(loadingLog || loadedLog) && (
         <div className="log">
           <pre>
-            {loadedLog && <Ansi>{fixLog(loadedLog)}</Ansi>}
+            {loadedLog && (
+              <Ansi>
+                {loadedLogType === "build" ? fixLog(loadedLog) : loadedLog}
+              </Ansi>
+            )}
             {loadingLog && "Loading..."}
           </pre>
         </div>
