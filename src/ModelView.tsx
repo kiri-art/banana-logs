@@ -109,7 +109,7 @@ export default function ModelView({
             </span>
           )}
         </td>
-        <td align="center">{model.requestedPods}</td>
+        <td align="center">{model.queuedTasks}</td>
         <td align="center">{model.workingTasks}</td>
         <td align="center">{model.callsFinished}</td>
         <td>
