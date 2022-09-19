@@ -12,6 +12,7 @@ export interface ModelStub {
 function App() {
   const [modelString, setModelString] = React.useState(lsBananaUserModels);
   const [modelStringError, setModelStringError] = React.useState("");
+  const [auto, setAuto] = React.useState(false);
 
   const models = React.useMemo<ModelStub[]>(() => {
     if (
@@ -69,6 +70,12 @@ function App() {
           <a href="https://github.com/gadicc/banana-logs">GitHub</a>.
         </div>
         <p>Note: Load logs to check Optimization status.</p>
+        <p>
+          <label>
+            <input type="checkbox" onClick={() => setAuto(!auto)} />
+            Auto Refresh (disable to explore logs more quickly)
+          </label>
+        </p>
         <br />
         <table id="modelsTable">
           <thead>
@@ -88,6 +95,7 @@ function App() {
                 key={model.modelID}
                 modelID={model.modelID}
                 modelKey={model.modelKey}
+                auto={auto}
               />
             ))}
           </tbody>

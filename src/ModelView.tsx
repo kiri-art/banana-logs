@@ -36,9 +36,11 @@ function GitHub(id: string) {
 export default function ModelView({
   modelID,
   modelKey,
+  auto,
 }: {
   modelID: string;
   modelKey: string;
+  auto: boolean;
 }) {
   const [checking, setChecking] = React.useState(false);
   const [model, setModel] = React.useState<Model | null>(null);
@@ -58,9 +60,10 @@ export default function ModelView({
 
   React.useEffect(() => {
     check();
+    if (!auto) return;
     const interval = setInterval(check, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [auto]);
 
   if (!model)
     return (
@@ -109,8 +112,13 @@ export default function ModelView({
         <td align="center">{model.requestedPods}</td>
         <td align="center">{model.workingTasks}</td>
         <td align="center">{model.callsFinished}</td>
-        <td style={{ opacity: 0.5 }}>
-          {" "}
+        <td>
+          {auto}
+          {!auto && (
+            <button disabled={checking} onClick={check}>
+              ⟳
+            </button>
+          )}{" "}
           {/* checking && "⏳" /* : <button onClick={check}>⟳</button> */}
         </td>
       </tr>
