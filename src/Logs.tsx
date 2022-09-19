@@ -2,7 +2,6 @@ import React from "react";
 import { format } from "date-fns";
 import Ansi from "ansi-to-react";
 
-import type { Model } from "./ModelView";
 import getLog from "./getLog";
 
 interface LogsResult {
