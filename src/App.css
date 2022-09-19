@@ -50,6 +50,10 @@
   max-height: 300px;
 }
 
+.model:nth-child(odd) {
+  background: #4c4c4c;
+}
+
 .model {
   /* border: 1px solid #aaa; */
   border-radius: 5px;
