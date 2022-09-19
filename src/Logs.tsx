@@ -30,9 +30,11 @@ function fixLog(log: string) {
 export default function Logs({
   modelID,
   setOptimized,
+  requestedLogs,
 }: {
   modelID: string;
   setOptimized: (optimized: boolean | null) => void;
+  requestedLogs: number | null;
 }) {
   const [_logs, _setLogs] = React.useState<LogsResult | null>(null);
   const [disabled, setDisabled] = React.useState(false);
@@ -115,10 +117,14 @@ export default function Logs({
     return logs;
   }, [_logs]);
 
+  React.useEffect(() => {
+    load();
+  }, [requestedLogs]);
+
   return (
     <div>
       <button onClick={load} disabled={disabled}>
-        {disabled ? "Loading..." : "Load Logs"}
+        {disabled ? "Loading..." : "⟳ Logs"}
       </button>
       {logs.length > 0 && (
         <span>
@@ -144,7 +150,7 @@ export default function Logs({
               ))}
           </select>
 
-          {loadedLog && <button onClick={reload}>⟳</button>}
+          {loadedLog && <button onClick={reload}>⟳ Log</button>}
         </span>
       )}
 

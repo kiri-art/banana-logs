@@ -42,13 +42,8 @@ export default function ModelView({
 }) {
   const [checking, setChecking] = React.useState(false);
   const [model, setModel] = React.useState<Model | null>(null);
-
-  const setOptimized = React.useCallback(
-    (optimized: boolean | null) => {
-      model && setModel({ ...model, _optimized: optimized });
-    },
-    [model]
-  );
+  const [requestedLogs, setRequestedLogs] = React.useState<number | null>(null);
+  const [optimized, setOptimized] = React.useState<boolean | null>(null);
 
   async function check() {
     setChecking(true);
@@ -63,43 +58,73 @@ export default function ModelView({
 
   React.useEffect(() => {
     check();
+    const interval = setInterval(check, 2000);
+    return () => clearInterval(interval);
   }, []);
 
+  if (!model)
+    return (
+      <tr>
+        <td colSpan={7}>Loading {modelKey}</td>
+      </tr>
+    );
+
   return (
-    <div className={"model " + (checking && "modelChecking")}>
-      <div>
-        {model && model.sourceGitRepo && (
-          <div>{GitHub(model.sourceGitRepo)}</div>
-        )}
-        <b>Model Key:</b> {modelKey}{" "}
-        {checking ? "⏳" : <button onClick={check}>⟳</button>}
-        {model && (
-          // Display all other data
-          <div className="modelExtra">
+    <>
+      <tr className={"model " /* + (checking && "modelChecking") */}>
+        <td>
+          {model.sourceGitRepo ? (
+            <span className="repoName">
+              {model.sourceGitRepo.split("/")[1]}
+            </span>
+          ) : (
+            modelKey.substring(0, 7)
+          )}{" "}
+          <button
+            onClick={() => setRequestedLogs(requestedLogs ? null : Date.now())}
+          >
+            Logs
+          </button>
+        </td>
+        <td align="center">
+          <span
+            className={
+              "chip status" + camelcase(model.status, { pascalCase: true })
+            }
+          >
+            {model.status}
+          </span>
+        </td>
+        <td align="center">
+          {model && (optimized === true || optimized === false) && (
             <span
               className={
-                "chip status" + camelcase(model.status, { pascalCase: true })
+                "chip status" + (optimized ? "Deployed" : "BuildFailed")
               }
             >
-              Status: {model.status}
+              {optimized ? "Optimized" : "Not Optimized"}
             </span>
-
-            {(model._optimized === true || model._optimized === false) && (
-              <span
-                className={
-                  "chip status" +
-                  (model._optimized ? "Deployed" : "BuildFailed")
-                }
-              >
-                {model._optimized ? "Optimized" : "Not Optimized"}
-              </span>
-            )}
-            <br />
-            <br />
-            <Logs modelID={modelID} setOptimized={setOptimized} />
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+        </td>
+        <td align="center">{model.requestedPods}</td>
+        <td align="center">{model.workingTasks}</td>
+        <td align="center">{model.callsFinished}</td>
+        <td style={{ opacity: 0.5 }}>
+          {" "}
+          {/* checking && "⏳" /* : <button onClick={check}>⟳</button> */}
+        </td>
+      </tr>
+      {requestedLogs && (
+        <tr>
+          <td colSpan={7}>
+            <Logs
+              modelID={modelID}
+              setOptimized={setOptimized}
+              requestedLogs={requestedLogs}
+            />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

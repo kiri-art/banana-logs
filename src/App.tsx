@@ -68,14 +68,30 @@ function App() {
           zeet.app (where Banana store their logs), and review the code on{" "}
           <a href="https://github.com/gadicc/banana-logs">GitHub</a>.
         </div>
+        <p>Note: Load logs to check Optimization status.</p>
         <br />
-        {models.map((model) => (
-          <ModelView
-            key={model.modelID}
-            modelID={model.modelID}
-            modelKey={model.modelKey}
-          />
-        ))}
+        <table id="modelsTable">
+          <thead>
+            <tr>
+              <th style={{ width: "300px" }}>Model</th>
+              <th style={{ width: "120px" }}>Status</th>
+              <th style={{ width: "120px" }}>Optimized</th>
+              <th style={{ width: "80px" }}>Wait</th>
+              <th style={{ width: "80px" }}>Busy</th>
+              <th style={{ width: "80px" }}>Done</th>
+              <th style={{ width: "50px" }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {models.map((model) => (
+              <ModelView
+                key={model.modelID}
+                modelID={model.modelID}
+                modelKey={model.modelKey}
+              />
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
