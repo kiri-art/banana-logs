@@ -34,19 +34,26 @@ function GitHub(id: string) {
 }
 
 export default function ModelView({
+  model,
+}: /*
   modelID,
   modelKey,
   auto,
-}: {
+  */
+{
+  model: Model;
+  /*
   modelID: string;
   modelKey: string;
   auto: boolean;
+  */
 }) {
-  const [checking, setChecking] = React.useState(false);
-  const [model, setModel] = React.useState<Model | null>(null);
+  // const [checking, setChecking] = React.useState(false);
+  // const [model, setModel] = React.useState<Model | null>(null);
   const [requestedLogs, setRequestedLogs] = React.useState<number | null>(null);
   const [optimized, setOptimized] = React.useState<boolean | null>(null);
 
+  /*
   async function check() {
     setChecking(true);
     const response = await fetch(
@@ -71,6 +78,7 @@ export default function ModelView({
         <td colSpan={7}>Loading {modelKey}</td>
       </tr>
     );
+  */
 
   return (
     <>
@@ -81,7 +89,7 @@ export default function ModelView({
               {model.sourceGitRepo.split("/")[1]}
             </span>
           ) : (
-            modelKey.substring(0, 7)
+            model.modelKey.substring(0, 7)
           )}{" "}
           <button
             onClick={() => setRequestedLogs(requestedLogs ? null : Date.now())}
@@ -113,12 +121,13 @@ export default function ModelView({
         <td align="center">{model.workingTasks}</td>
         <td align="center">{model.callsFinished}</td>
         <td>
+          {/* 
           {auto}
           {!auto && (
             <button disabled={checking} onClick={check}>
               ⟳
             </button>
-          )}{" "}
+          )}{" "} */}
           {/* checking && "⏳" /* : <button onClick={check}>⟳</button> */}
         </td>
       </tr>
@@ -126,7 +135,7 @@ export default function ModelView({
         <tr>
           <td colSpan={7}>
             <Logs
-              modelID={modelID}
+              modelID={model.modelID}
               setOptimized={setOptimized}
               requestedLogs={requestedLogs}
             />
