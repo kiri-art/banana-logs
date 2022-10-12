@@ -56,9 +56,9 @@ function Models({
   React.useEffect(() => {
     if (auto) loadTimeout();
     return () => {
-      console.log("return");
+      // console.log("return");
       clearTimeout(timeout);
-      controller.abort();
+      if (controller) controller.abort();
     };
   }, [auto, load]);
 
