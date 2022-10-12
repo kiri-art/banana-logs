@@ -29,19 +29,37 @@ function Models({
 }) {
   const [models, setModels] = React.useState<Model[]>([]);
 
+  let controller: AbortController;
   const load = React.useCallback(async () => {
     if (!(transformApiUrl && teamID)) return;
-    const response = await fetch(transformApiUrl + "/models/" + teamID);
+    controller = new AbortController();
+    const response = await fetch(transformApiUrl + "/models/" + teamID, {
+      signal: controller.signal,
+    });
     const result = await response.json();
     console.log(result);
     setModels(result);
   }, [transformApiUrl, teamID]);
 
+  let timeout: ReturnType<typeof setTimeout>;
+  async function loadTimeout() {
+    try {
+      await load();
+    } catch (e) {
+      if (e instanceof DOMException) return; // DOMException: The user aborted a request.
+      console.log(e);
+      return;
+    }
+    timeout = setTimeout(loadTimeout, 1000);
+  }
+
   React.useEffect(() => {
-    if (auto) load();
-    else return;
-    const interval = setInterval(load, 2000);
-    return () => clearInterval(interval);
+    if (auto) loadTimeout();
+    return () => {
+      console.log("return");
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [auto, load]);
 
   if (!(transformApiUrl && teamID)) return null;
