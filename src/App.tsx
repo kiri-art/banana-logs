@@ -140,7 +140,19 @@ function App() {
   return (
     <div className="App">
       <div>
-        <h1>Banana Logs</h1>
+        <h1>Banana Logs (Unofficial)</h1>
+        <div
+          style={{
+            padding: "5px 10px 5px 10px",
+            background: "#a00",
+            borderRadius: "3px",
+          }}
+        >
+          [2022-10-22] Notice: big changes expected to the Banana Dashboard over
+          the coming week, which will break the Unofficial Logs. Once they land,
+          we'll assess whether to adapt the unofficial logs or simply retire
+          them. Happy logging!
+        </div>
         <p>
           Log in to <a href="https://app.banana.dev/">app.banana.dev</a>, open
           developer console, and copy and paste the result of:
