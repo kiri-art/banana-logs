@@ -4,10 +4,12 @@ import ModelView from "./ModelView";
 import type { Model } from "./ModelView";
 
 const lsbananaStateString = localStorage.bananaStateString || "";
+const BANANA_API_URL_BASE = "https://app.banana.dev/api";
 
 export interface BananaState {
   bananaUser: BananaUser;
   transformApiUrl: string;
+  user: User;
 }
 
 export interface BananaUser {
@@ -18,24 +20,44 @@ export interface BananaUser {
   userID: string;
 }
 
+export interface UserStsTokenManager {
+  accessToken: string;
+  expirationTime: number;
+  refreshToken: string;
+}
+
+export interface User {
+  stsTokenManager: UserStsTokenManager;
+}
+
 function Models({
   teamID,
   transformApiUrl,
   auto,
+  stsTokenManager,
 }: {
   teamID: string;
   transformApiUrl: string;
   auto: boolean;
+  stsTokenManager: UserStsTokenManager;
 }) {
   const [models, setModels] = React.useState<Model[]>([]);
 
   let controller: AbortController;
   const load = React.useCallback(async () => {
-    if (!(transformApiUrl && teamID)) return;
+    // if (!(transformApiUrl && teamID)) return;
+    if (!teamID) return;
     controller = new AbortController();
-    const response = await fetch(transformApiUrl + "/models/" + teamID, {
-      signal: controller.signal,
-    });
+    // const response = await fetch(transformApiUrl + "/models/" + teamID, {
+    const response = await fetch(
+      `${BANANA_API_URL_BASE}/team/${teamID}/models`,
+      {
+        headers: {
+          Authorization: "Bearer " + stsTokenManager.accessToken,
+        },
+        signal: controller.signal,
+      }
+    );
     const result = await response.json();
     console.log(result);
     setModels(result);
@@ -62,7 +84,8 @@ function Models({
     };
   }, [auto, load]);
 
-  if (!(transformApiUrl && teamID)) return null;
+  // if (!(transformApiUrl && teamID)) return null;
+  if (!teamID) return null;
 
   if (!models.length) return <span>Loading...</span>;
 
@@ -130,7 +153,7 @@ function App() {
   }, [bananaStateString]);
 
   const COPY_STR =
-    "let bs = JSON.parse(localStorage.bananaState); JSON.stringify({ bananaUser: bs.bananaUser, transformApiUrl: bs.transformApiUrl });";
+    "let bs = JSON.parse(localStorage.bananaState); JSON.stringify({ bananaUser: bs.bananaUser, transformApiUrl: bs.transformApiUrl, user: { stsTokenManager: bs.user.stsTokenManager }});";
 
   async function copy() {
     await navigator.clipboard.writeText(COPY_STR);
@@ -196,6 +219,7 @@ function App() {
         <Models
           teamID={bananaState?.bananaUser?.teamIDs?.[0]}
           transformApiUrl={bananaState?.transformApiUrl}
+          stsTokenManager={bananaState?.user?.stsTokenManager}
           auto={auto}
         />
       </div>
