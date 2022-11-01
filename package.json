@@ -10,10 +10,12 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "@vercel/node": "^2.5.26",
     "ansi-to-react": "^6.1.6",
     "camelcase": "^7.0.0",
     "date-fns": "^2.29.3",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "node-fetch": "2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -24,7 +26,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "api-dev": "yarn tsc -w --outDir api api-src/*.ts"
   },
   "eslintConfig": {
     "extends": [

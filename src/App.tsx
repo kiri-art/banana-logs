@@ -35,11 +35,13 @@ function Models({
   transformApiUrl,
   auto,
   stsTokenManager,
+  proxy,
 }: {
   teamID: string;
   transformApiUrl: string;
   auto: boolean;
   stsTokenManager: UserStsTokenManager;
+  proxy: string;
 }) {
   const [models, setModels] = React.useState<Model[]>([]);
 
@@ -49,15 +51,17 @@ function Models({
     if (!teamID) return;
     controller = new AbortController();
     // const response = await fetch(transformApiUrl + "/models/" + teamID, {
-    const response = await fetch(
-      `${BANANA_API_URL_BASE}/team/${teamID}/models`,
-      {
-        headers: {
-          Authorization: "Bearer " + stsTokenManager.accessToken,
-        },
-        signal: controller.signal,
-      }
-    );
+    const qs = new URLSearchParams({
+      url: `${BANANA_API_URL_BASE}/team/${teamID}/models`,
+    });
+    const url = proxy + "?" + qs.toString();
+    console.log(url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: "Bearer " + stsTokenManager.accessToken,
+      },
+      signal: controller.signal,
+    });
     const result = await response.json();
     console.log(result);
     setModels(result);
@@ -123,6 +127,7 @@ function App() {
     React.useState("");
   const [auto, setAuto] = React.useState(true);
   const [hasCopied, setHasCopied] = React.useState(false);
+  const [proxy, setProxy] = React.useState(location.origin + "/api/proxy");
 
   const bananaState = React.useMemo<BananaState>(() => {
     if (
@@ -152,8 +157,29 @@ function App() {
     return bananaState;
   }, [bananaStateString]);
 
-  const COPY_STR =
-    "let bs = JSON.parse(localStorage.bananaState); JSON.stringify({ bananaUser: bs.bananaUser, transformApiUrl: bs.transformApiUrl, user: { stsTokenManager: bs.user.stsTokenManager }});";
+  const COPY_STR = `
+  indexedDB.open("firebaseLocalStorageDb").onsuccess = event => {
+    const db = event.target.result;
+    const tx = db.transaction("firebaseLocalStorage");
+    const store = tx.objectStore("firebaseLocalStorage");
+    const req = store.getAll();
+    req.onsuccess = event => {
+        for (const result of req.result) {
+            if (result.fbase_key.match(/^firebase:authUser/)) {
+                const stsTokenManager = result.value.stsTokenManager;
+                const bananaState = JSON.parse(localStorage.bananaState);
+                const data = {
+                  bananaUser: bananaState.bananaUser,
+                  user: { stsTokenManager }
+                };
+                const jsonStr = JSON.stringify(data);
+                console.log(jsonStr);
+                return;
+            }
+        }
+    }
+  }
+  `;
 
   async function copy() {
     await navigator.clipboard.writeText(COPY_STR);
@@ -171,11 +197,29 @@ function App() {
             borderRadius: "3px",
           }}
         >
-          [2022-10-22] Notice: big changes expected to the Banana Dashboard over
-          the coming week, which will break the Unofficial Logs. Once they land,
-          we'll assess whether to adapt the unofficial logs or simply retire
-          them. Happy logging!
+          [2022-11-01] Notice: working again with the new security features,
+          BUT, we have to proxy the requests via node to get past the CORS
+          restrictions.
+          <i>
+            This means your banana credentials which give FULL ACCESS TO YOUR
+            ACCOUNT are sent over the network to a server not under your
+            control.
+          </i>
+          I'm super uncomfortable with this, and maybe it's something I can work
+          out with Banana, but in the meantime, you're welcome to check the
+          source code or provide your own CORS proxy. DO. NOT. USE. A. PUBLIC.
+          CORS. PROXY. SERVICE.
         </div>
+
+        <p>
+          <input
+            type="text"
+            value={proxy}
+            size={32}
+            onChange={(event) => setProxy(event.target.value)}
+          />
+        </p>
+
         <p>
           Log in to <a href="https://app.banana.dev/">app.banana.dev</a>, open
           developer console, and copy and paste the result of:
@@ -221,6 +265,7 @@ function App() {
           transformApiUrl={bananaState?.transformApiUrl}
           stsTokenManager={bananaState?.user?.stsTokenManager}
           auto={auto}
+          proxy={proxy}
         />
       </div>
     </div>
