@@ -149,7 +149,7 @@ function App() {
 
     // if (!Array.isArray(models)) return [];
 
-    setAccessToken(bananaState.user.stsTokenManager.accessToken);
+    setAccessToken(bananaState?.user?.stsTokenManager?.accessToken);
 
     return bananaState;
   }, [bananaStateString]);
