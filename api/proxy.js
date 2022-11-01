@@ -43,12 +43,14 @@ function Proxy(req, res) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log(req.headers);
+                    if (process.env.NODE_ENV === "development")
+                        console.log(req.headers);
                     authorization = req.headers["authorization"];
                     if (!authorization)
                         return [2 /*return*/, res.status(400).end("Bad Request")];
                     url = req.query.url;
-                    console.log(url);
+                    if (process.env.NODE_ENV === "development")
+                        console.log(url);
                     return [4 /*yield*/, (0, node_fetch_1["default"])(url, {
                             headers: {
                                 Authorization: authorization
