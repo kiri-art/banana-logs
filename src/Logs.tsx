@@ -2,15 +2,26 @@ import React from "react";
 import { format } from "date-fns";
 import Ansi from "ansi-to-react";
 
-import getLog from "./getLog";
+// import getLog from "./getLog";
+import bananaFetch from "./bananaFetch";
 
+/*
 interface LogsResult {
   logIDs: string[];
 }
+*/
+
+interface BananaLog {
+  logID: string;
+  log: string;
+}
 
 interface Log {
+  type: string;
   date: Date;
-  name: string;
+  // name: string;
+  logID: string;
+  log: string;
 }
 
 function fixLog(log: string) {
@@ -35,7 +46,7 @@ export default function Logs({
   setOptimized: (optimized: boolean | null) => void;
   requestedLogs: number | null;
 }) {
-  const [_logs, _setLogs] = React.useState<LogsResult | null>(null);
+  const [_logs, _setLogs] = React.useState<BananaLog[] | null>(null);
   const [disabled, setDisabled] = React.useState(false);
   const [loadingLog, setLoadingLog] = React.useState(false);
   const [loadedLog, setLoadedLog] = React.useState("");
@@ -48,12 +59,9 @@ export default function Logs({
 
   async function load() {
     setDisabled(true);
-    const response = await fetch(
-      "https://backend-f3tq-qvcm.zeet-audiblogs.zeet.app/model/" +
-        modelID +
-        "/logs"
-    );
-    const result: LogsResult = await response.json();
+    const response = await bananaFetch("/model/" + modelID + "/logs");
+    const result: BananaLog[] = await response.json();
+    console.log({ logs: result });
     _setLogs(result);
     setDisabled(false);
   }
@@ -62,7 +70,9 @@ export default function Logs({
     setLogID(logID);
     setLoadingLog(true);
     setLoadedLogType("");
-    const log = await getLog(modelID, logID);
+    // const log = await getLog(modelID, logID);
+    const log = _logs?.find((log) => log.logID === logID)?.log;
+    if (!log) throw new Error("Couldn't find log");
     setLoadingLog(false);
     setLoadedLog(log);
     setLoadedLogType(logID.match(/build/) ? "build" : "runtime");
@@ -86,19 +96,20 @@ export default function Logs({
 
   const logs = React.useMemo(() => {
     if (!_logs) return [];
-    const logs = _logs.logIDs
-      .map((name: string) => {
-        const match = name.match(/_([\d]+)\.log$/);
+    const logs = _logs
+      .map(({ logID, log }) => {
+        const match = logID.match(/_([\d]+)\.log$/);
         const timestamp = match && match[1] && parseInt(match[1]);
         const date = timestamp ? new Date(timestamp * 1000) : new Date(NaN);
 
-        const typeMatch = name.match(/^(.+?)_/);
-        const type = typeMatch && typeMatch[1];
+        const typeMatch = logID.match(/^(.+?)_/);
+        const type = typeMatch ? typeMatch[1] : "unknown";
 
         return {
           type,
           date,
-          name,
+          logID,
+          log,
         };
       })
       .sort((a: Log, b: Log) => b.date.getTime() - a.date.getTime());
@@ -110,8 +121,10 @@ export default function Logs({
     (async function checkRecentBuild() {
       if (!mostRecentBuildLog) return;
       // console.log({ mostRecentBuildLog });
-      const log = await getLog(modelID, mostRecentBuildLog.name);
       // console.log(log);
+
+      // const log = await getLog(modelID, mostRecentBuildLog.logID);
+      const log = mostRecentBuildLog.log;
 
       if (log.match(/Optimization Failed/)) setOptimized(false);
       else if (log.match(/optimizations SUCCESS/)) setOptimized(true);
@@ -145,7 +158,7 @@ export default function Logs({
             {logs
               .filter((log) => log.type === "build")
               .map((log) => (
-                <option key={log.name} value={log.name}>
+                <option key={log.logID} value={log.logID}>
                   {format(log.date, "yyyy-MM-dd kk:mm:ss")}
                 </option>
               ))}
@@ -159,13 +172,13 @@ export default function Logs({
             {logs
               .filter((log) => log.type === "runtime")
               .map((log) => (
-                <option key={log.name} value={log.name}>
+                <option key={log.logID} value={log.logID}>
                   {format(log.date, "yyyy-MM-dd kk:mm:ss")}
                 </option>
               ))}
           </select>
 
-          {loadedLog && <button onClick={reload}>⟳ Log</button>}
+          {/* loadedLog && <button onClick={reload}>⟳ Log</button> */}
         </span>
       )}
 

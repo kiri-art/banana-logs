@@ -2,9 +2,12 @@ import React from "react";
 import "./App.css";
 import ModelView from "./ModelView";
 import type { Model } from "./ModelView";
+import bananaFetch, {
+  setAccessToken,
+  setProxy as bananaFetchSetProxy,
+} from "./bananaFetch";
 
 const lsbananaStateString = localStorage.bananaStateString || "";
-const BANANA_API_URL_BASE = "https://app.banana.dev/api";
 
 export interface BananaState {
   bananaUser: BananaUser;
@@ -50,16 +53,7 @@ function Models({
     // if (!(transformApiUrl && teamID)) return;
     if (!teamID) return;
     controller = new AbortController();
-    // const response = await fetch(transformApiUrl + "/models/" + teamID, {
-    const qs = new URLSearchParams({
-      url: `${BANANA_API_URL_BASE}/team/${teamID}/models`,
-    });
-    const url = proxy + "?" + qs.toString();
-    console.log(url);
-    const response = await fetch(url, {
-      headers: {
-        Authorization: "Bearer " + stsTokenManager.accessToken,
-      },
+    const response = await bananaFetch(`/team/${teamID}/models`, {
       signal: controller.signal,
     });
     const result = await response.json();
@@ -128,6 +122,7 @@ function App() {
   const [auto, setAuto] = React.useState(true);
   const [hasCopied, setHasCopied] = React.useState(false);
   const [proxy, setProxy] = React.useState(location.origin + "/api/proxy");
+  bananaFetchSetProxy(proxy);
 
   const bananaState = React.useMemo<BananaState>(() => {
     if (
@@ -153,6 +148,8 @@ function App() {
     if (bananaStateStringError) setbananaStateStringError("");
 
     // if (!Array.isArray(models)) return [];
+
+    setAccessToken(bananaState.user.stsTokenManager.accessToken);
 
     return bananaState;
   }, [bananaStateString]);
@@ -210,6 +207,11 @@ function App() {
           source code or provide your own CORS proxy. DO. NOT. USE. A. PUBLIC.
           CORS. PROXY. SERVICE.
         </div>
+        <p>
+          This is brand new. No token refresh yet, so watch the JS console for
+          errors and redo the instructions when you start getting credential
+          errrors.
+        </p>
 
         <p>
           <input
@@ -241,7 +243,7 @@ function App() {
           <div style={{ color: "red" }}>{bananaStateStringError}</div>
         )}
         <br />
-        <div>
+        <div style={{ textDecoration: "line-through" }}>
           Note: This is an SPA with no backend. Above data is saved to
           localStorage only. You're encouraged to open the developer console and
           see for yourself that no data is sent over the network except to
